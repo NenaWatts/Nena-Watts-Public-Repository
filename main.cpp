@@ -2,8 +2,9 @@
 Inserting the randomly generated integers into a BST generally gives a height in the order of:
 
 Your answer:
-
-
+Height of O(N) for unbalanced trees, this is the worst case 
+For balanced trees it gives a height in order of O(logN), this is the average case 
+N is the number of nodes
 */
 
 #include <cstdlib> // For rand() and srand()
@@ -22,18 +23,18 @@ void insertRandomIntegers(BST<int>* root, int numIntegers)
 {
     // The range of random integers
     const int minValue = -1000000000;
-    const int maxValue =  1000000000;
+    const int maxValue = 1000000000;
     int randomInteger;
 
     // Generate a uniform distribution to generate random integers
     random_device dev;
     mt19937 rng(dev());
-    uniform_int_distribution<std::mt19937::result_type> dist(minValue, maxValue); 
+    uniform_int_distribution<std::mt19937::result_type> dist(minValue, maxValue);
 
     // Generate random integers (without duplicates) from the specified range
     for (int i = 0; i < numIntegers; ++i) {
         randomInteger = dist(rng);
-        while ( root->contains(randomInteger) == true )
+        while (root->contains(randomInteger) == true)
         {
             randomInteger = dist(rng);
         }
@@ -47,7 +48,7 @@ int main()
     srand(static_cast<unsigned>(time(0)));
 
     // (i) test member functions with simple 6 inputs
-    BST<int> *bst = new BST<int>();
+    BST<int>* bst = new BST<int>();
     bst->insert(11);
     bst->insert(1);
     bst->insert(6);
@@ -66,14 +67,14 @@ int main()
     cout << "(1.2) Print BST in level order: " << endl;
     bst->printLevels();
 
-    cout << "(1.3) Is 100 in BST? true (1) or false (0): " << bst->contains(100) << endl;
+    cout << "\n(1.3) Is 100 in BST? true (1) or false (0): " << bst->contains(100) << endl;
 
     cout << "(1.4) Is 9 in BST? true (1) or false (0): " << bst->contains(9) << endl;
-    
+
     cout << "(1.5) BST size: " << bst->treeSize() << endl;
 
     cout << "(1.6) Height of BST: " << bst->treeHeight() << endl;
-    
+
     cout << "(1.7) Print max path: " << endl << " ";
     bst->printMaxPath();
     cout << endl;
@@ -86,7 +87,7 @@ int main()
     cout << "(1.9) Print BST in level order: " << endl;
     bst->printLevels();
 
-    cout << "(1.10) BST size: " << bst->treeSize() << endl;
+    cout << "\n(1.10) BST size: " << bst->treeSize() << endl;
 
     // Delete this bst
     delete bst;
