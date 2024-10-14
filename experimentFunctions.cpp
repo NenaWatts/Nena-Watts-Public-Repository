@@ -1,6 +1,10 @@
-
-#include "AVLTree.h"
 #include "experimentFunctions.h"
+#include "AVLTree.h"
+#include <random>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
 
 
 using namespace std;
@@ -14,42 +18,72 @@ void insertRandomIntegers(AVLTree<int>* avl, int numIntegers)
 {
     // The range of random integers
     const int minValue = -1000000000;
-    const int maxValue =  1000000000;
+    const int maxValue = 1000000000;
     int randomInteger;
 
     // Generate a uniform distribution to generate random integers
     random_device dev;
     mt19937 rng(dev());
-    uniform_int_distribution<std::mt19937::result_type> dist(minValue, maxValue); 
-
+    uniform_int_distribution<int> dist(minValue, maxValue);
+    //uniform_int_distribution<std::mt19937::result_type> dist(minValue, maxValue);
+    int maxInsertions = 100;
     // Generate random integers (without duplicates) from the specified range
-    for (int i = 0; i < numIntegers; ++i) {
-        randomInteger = dist(rng);
-        while ( avl->contains(randomInteger) == true )
+    const int maxAttemps = 100;
+    int attempts = 0;
+    for (int i = 0; i < numIntegers; i++) {
+        int randomInteger = dist(rng);
+        int attempts = 0;
+        
+        while (avl->contains(randomInteger) == true)
         {
             randomInteger = dist(rng);
+            attempts++;
+  
         }
-        avl->insert(randomInteger);
+        if (attempts >= maxAttemps)
+        {
+            cerr << "Warnnig: Reached max attempts" << endl;
+            break;
+        }
+        if (attempts < maxAttemps)
+        {
+            avl->insert(randomInteger);
+        }
+        
     }
 }
 
 void deleteRandomIntegers(AVLTree<int>* avl, int numDelete)
 {
     int treeSize = avl->treeSize();
+    if (treeSize == 0 || numDelete <= 0)
+    {
+        std::cerr << "Cant delete" << endl;
+        return;
+   }
     // The range of random integers for ranks in AVL
     const int minValue = 1;
     const int maxValue = treeSize;
+
+    if (minValue > maxValue)
+    {
+    std::cerr << "Error, min is less than max value" << endl;
+    return;
+    }
     int randomInteger;
 
     // Generate a uniform distribution to generate random integers
     random_device dev;
     mt19937 rng(dev());
-    uniform_int_distribution<std::mt19937::result_type> dist(minValue, maxValue); 
+    uniform_int_distribution<int> dist(minValue, maxValue);
+    //uniform_int_distribution<std::mt19937::result_type> dist(minValue, maxValue);
 
+    numDelete = min(numDelete, treeSize);
     // Randomly delete a node by its rank in AVL
     for (int i = 0; i < numDelete; i++) {
-        randomInteger = dist(rng);
+        int randomInteger = dist(rng);
         avl->removeByRank(randomInteger);
+        
     }
 }
 
@@ -61,7 +95,7 @@ bool testBalanced(AVLTree<int>* avl) {
     return avl->isBalanced();
 }
 
-bool testContains(AVLTree<int>*avl, int numIntegers) {
+bool testContains(AVLTree<int>* avl, int numIntegers) {
     bool flag = 1;
     for (int i = 0; i < numIntegers; i++)
     {
@@ -79,7 +113,7 @@ bool testContains(AVLTree<int>*avl, int numIntegers) {
     return flag;
 }
 
-bool testSize(AVLTree<int> * avl, int targetNumIntegers) {
+bool testSize(AVLTree<int>* avl, int targetNumIntegers) {
     return (avl->treeSize() == targetNumIntegers);
 }
 
@@ -117,25 +151,25 @@ void experiment1(int numIntegers) {
         tree3->insert(testValuesShuffled[i]);
     }
 
-    bool testBSTOrder1 = testBST( tree1 );
-    bool testBalanced1 = testBalanced( tree1 );
+    bool testBSTOrder1 = testBST(tree1);
+    bool testBalanced1 = testBalanced(tree1);
     bool testContains1 = testContains(tree1, numIntegers);
     cout << "(EXP1.1) Tree1 AVL validation: " << (testBSTOrder1 && testBalanced1 && testContains1) << endl;
     cout << "         BST order: " << testBSTOrder1 << "; AVL balanced: " << testBalanced1 << "; Contains generated odd int only: " << testContains1 << endl;
 
-    bool testBSTOrder2 = testBST( tree2 );
-    bool testBalanced2 = testBalanced( tree2 );
+    bool testBSTOrder2 = testBST(tree2);
+    bool testBalanced2 = testBalanced(tree2);
     bool testContains2 = testContains(tree2, numIntegers);
     cout << "(EXP1.2) Tree2 AVL validation: " << (testBSTOrder2 && testBalanced2) << endl;
     cout << "         BST order: " << testBSTOrder2 << "; AVL balanced: " << testBalanced2 << "; Contains generated odd int only: " << testContains2 << endl;
 
-    bool testBSTOrder3 = testBST( tree3 );
-    bool testBalanced3 = testBalanced( tree3 );
+    bool testBSTOrder3 = testBST(tree3);
+    bool testBalanced3 = testBalanced(tree3);
     bool testContains3 = testContains(tree3, numIntegers);
     cout << "(EXP1.3) Tree3 AVL validation: " << (testBSTOrder3 && testBalanced3) << endl;
     cout << "         BST order: " << testBSTOrder3 << "; AVL balanced: " << testBalanced3 << "; Contains generated odd int only: " << testContains3 << endl;
 
-    if ( testBSTOrder1 && testBalanced1 && testContains1 && testBSTOrder2 && testBalanced2 && testContains2 && testBSTOrder3 && testBalanced3 && testContains3 )
+    if (testBSTOrder1 && testBalanced1 && testContains1 && testBSTOrder2 && testBalanced2 && testContains2 && testBSTOrder3 && testBalanced3 && testContains3)
     {
         cout << "(EXP1.4) Conclusion: my AVL tree implementation is correct" << endl;
     }
@@ -157,79 +191,79 @@ void stage1(AVLTree<int>* avl, int numIntegers) {
     insertRandomIntegers(avl, numIntegers);
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, milli> duration = end - start;
-    
+
     cout << "(EXP2.1) Inserted " << numIntegers << " random integers. " << "Execution time: " << duration.count() << " ms" << endl;
-    
-    cout << "(EXP2.2) AVL balanced? " << testBalanced( avl ) << endl;
+
+    cout << "(EXP2.2) AVL balanced? " << testBalanced(avl) << endl;
 
     cout << "(EXP2.3) After inserting " << numIntegers << " random integers, AVL tree size: " << avl->treeSize() << endl;
     cout << "         Comparing with the BST in Figure 4.29 of Textbook: ";
-    if (relativeSizeChangeFromTextbook > 0) 
-        cout << (100*relativeSizeChangeFromTextbook) << "% more nodes" << endl;
-    else 
-        cout << (-100*relativeSizeChangeFromTextbook) << "% less nodes" << endl;
-    
+    if (relativeSizeChangeFromTextbook > 0)
+        cout << (100 * relativeSizeChangeFromTextbook) << "% more nodes" << endl;
+    else
+        cout << (-100 * relativeSizeChangeFromTextbook) << "% less nodes" << endl;
+
     cout << "(EXP2.4) Compute height (DFS): " << avl->computeHeight() << "; root->height: " << avl->readRootHeight() << endl;
     cout << "         testHeigth? " << testHeight(avl) << endl;
-    
+
     double averageDepth = avl->averageDepth();
     cout << "(EXP2.5) The average depth: " << averageDepth << " (v.s. log2(n)=" << log2(numIntegers) << ")" << endl;
     double relativeChangeFromTextbookInitial = (averageDepth - 9.98) / 9.98;
     cout << "         Comparing with the BST in Figure 4.29 of Textbook (9.98): ";
     if (relativeChangeFromTextbookInitial > 0)
-        cout << (relativeChangeFromTextbookInitial*100) << "% greater" << endl;
+        cout << (relativeChangeFromTextbookInitial * 100) << "% greater" << endl;
     else
-        cout << (-relativeChangeFromTextbookInitial*100) << "% less" << endl;
+        cout << (-relativeChangeFromTextbookInitial * 100) << "% less" << endl;
 }
 
 void stage2(AVLTree<int>* avl, int numRandomInsertRemove) {
     // use treeSize() to compute how many extra data we will insert into AVL compared with Figure 4.29 (500 nodes there) relatively
     int numIntegers = avl->treeSize();
-    double relativeSizeChangeFromTextbook = ( numIntegers - 500.0 ) / 500.0;
-    
+    double relativeSizeChangeFromTextbook = (numIntegers - 500.0) / 500.0;
+
     // use averageDepth() to compute what is the initial average depth before stage 2
     double averageDepth = avl->averageDepth();
 
     auto start = chrono::high_resolution_clock::now();
-    for (int i=0; i<numRandomInsertRemove; i++) {
+    for (int i = 0; i < numRandomInsertRemove; i++) {
         insertRandomIntegers(avl, 1);
         deleteRandomIntegers(avl, 1);
     }
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, milli> duration = end - start;
-    
+
     cout << "(EXP2.6) Random insert/remove " << numRandomInsertRemove << " random integers. " << "Execution time: " << duration.count() << " ms" << endl;
-    cout << "(EXP2.7) AVL balanced? " << testBalanced( avl ) << endl;
+    cout << "(EXP2.7) AVL balanced? " << testBalanced(avl) << endl;
 
     cout << "(EXP2.8) Now AVL tree size: " << avl->treeSize();
-    cout << ", testSize()? " << testSize( avl, numIntegers ) << endl;
+    cout << ", testSize()? " << testSize(avl, numIntegers) << endl;
     cout << "         Comparing with the BST in Figure 4.30 of Textbook: ";
-    if (relativeSizeChangeFromTextbook > 0) 
-        cout << (100*relativeSizeChangeFromTextbook) << "% more nodes" << endl;
-    else 
-        cout << (-100*relativeSizeChangeFromTextbook) << "% less nodes" << endl;
-    
+    if (relativeSizeChangeFromTextbook > 0)
+        cout << (100 * relativeSizeChangeFromTextbook) << "% more nodes" << endl;
+    else
+        cout << (-100 * relativeSizeChangeFromTextbook) << "% less nodes" << endl;
+
     cout << "(EXP2.9) Compute height (DFS): " << avl->computeHeight() << "; root->height: " << avl->readRootHeight() << endl;
     cout << "         testHeigth? " << testHeight(avl) << endl;
 
     double newAverageDepth = avl->averageDepth();
-    double relativeChangeFromInitial = ( newAverageDepth - averageDepth ) / newAverageDepth;
-    double relativeChangeFromTextbook = ( newAverageDepth - 12.51 ) / 12.51;
+    double relativeChangeFromInitial = (newAverageDepth - averageDepth) / newAverageDepth;
+    double relativeChangeFromTextbook = (newAverageDepth - 12.51) / 12.51;
     cout << "(EXP2.10) New average depth: " << newAverageDepth << " (v.s. log2(n)=" << log2(numIntegers) << ")" << endl;
     cout << "          Comparing with the initial AVL (" << averageDepth << "): ";
     if (relativeChangeFromInitial > 0)
-        cout << (relativeChangeFromInitial*100) << "% more" << endl;
+        cout << (relativeChangeFromInitial * 100) << "% more" << endl;
     else
-        cout << (-relativeChangeFromInitial*100) << "% less" << endl;
-    if ( abs( relativeChangeFromInitial ) <= 0.01 )
+        cout << (-relativeChangeFromInitial * 100) << "% less" << endl;
+    if (abs(relativeChangeFromInitial) <= 0.01)
         cout << "           ==> average depth of my AVL tree does not change significantly (<=1%)" << endl;
 
     cout << "          Comparing with the BST in Figure 4.30 of Textbook (12.51): ";
     if (relativeChangeFromTextbook > 0)
-        cout << (relativeChangeFromTextbook*100) << "% more" << endl;
+        cout << (relativeChangeFromTextbook * 100) << "% more" << endl;
     else
     {
-        cout << (-relativeChangeFromTextbook*100) << "% less" << endl;
+        cout << (-relativeChangeFromTextbook * 100) << "% less" << endl;
         if (-relativeChangeFromTextbook > 0.1)
             cout << "           ==> my AVL tree improves the average depth over BST significantly (>10%)" << endl;
     }

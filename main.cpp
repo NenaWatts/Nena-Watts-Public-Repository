@@ -1,4 +1,4 @@
-``
+
 
 #include "AVLTree.h"
 #include "experimentFunctions.h"
@@ -19,8 +19,8 @@ int main()
     cout << "============================ Experiment 2, Stage 1 ============================" << endl;
 
     // Stage 1: insert random integers into AVL BST, as Figure 4.29 of textbook
-    numIntegers = 20;
-    AVLTree<int>*avl = new AVLTree<int>();
+    numIntegers = 3000;
+    AVLTree<int>* avl = new AVLTree<int>();
     stage1(avl, numIntegers);
     cout << endl;
 
